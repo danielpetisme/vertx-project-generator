@@ -1,0 +1,42 @@
+# DO NOT EDIT MANUALLY, RUN ./gradlew travis TO GENERATE.
+sudo: false
+
+language: java
+
+before_cache:
+- rm -f  $HOME/.m2
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+
+jdk:
+- oraclejdk8
+
+
+jobs:
+  include:
+  - stage: "Generation Tests"
+    name: "Basic generation"
+    script: ./gradlew :test:cleanTest :test:test -PexcludeTags=test-execution
+
+  - stage: "Execution Tests"
+    name: "core-java-maven"
+    env: VERTX_PROJECT_TYPE=core VERTX_PROJECT_BUILDTOOL=maven VERTX_PROJECT_LANGUAGE=java
+    script: ./gradlew :test:cleanTest :test:test -PincludeTags=test-execution
+  - stage: "Execution Tests"
+    name: "core-kotlin-maven"
+    env: VERTX_PROJECT_TYPE=core VERTX_PROJECT_BUILDTOOL=maven VERTX_PROJECT_LANGUAGE=kotlin
+    script: ./gradlew :test:cleanTest :test:test -PincludeTags=test-execution
+  - stage: "Execution Tests"
+    name: "core-java-gradle"
+    env: VERTX_PROJECT_TYPE=core VERTX_PROJECT_BUILDTOOL=gradle VERTX_PROJECT_LANGUAGE=java
+    script: ./gradlew :test:cleanTest :test:test -PincludeTags=test-execution
+  - stage: "Execution Tests"
+    name: "core-kotlin-gradle"
+    env: VERTX_PROJECT_TYPE=core VERTX_PROJECT_BUILDTOOL=gradle VERTX_PROJECT_LANGUAGE=kotlin
+    script: ./gradlew :test:cleanTest :test:test -PincludeTags=test-execution

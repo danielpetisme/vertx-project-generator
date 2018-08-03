@@ -1,0 +1,91 @@
+= Vertx Project Generator
+
+image:https://travis-ci.org/danielpetisme/vertx-project-generator.svg?branch=master["Build Status", link="https://travis-ci.org/danielpetisme/vertx-project-generator"]
+image:https://img.shields.io/github/license/danielpetisme/vertx-project-generator.svg[GitHub]
+
+Welcome! This Gradle project aims to generate Vert.x Projects. Its main (only) purpose is to be the backend of http://start.vertx.io
+
+== Quickstart
+```
+./gradlew generateVertxProject \
+  -Ptype=core \
+  -PgroupId=com.acme \
+  -PartifactId=sample \
+  -PbuildTool=maven \
+  -Planguage=java \
+  -PvertxVersion=3.5.3 \
+  -PvertxDependencies=vertx-web,vertx-config \
+  -ParchiveFormat=zip
+```
+
+== Project Properties
+
+|===
+|Name |Description | Default Value
+
+|`type`
+| The type of project to generate
+|`"core"`
+
+
+|`groupId`
+|The project groupId
+|`"io.vertx"`
+
+|`artifactId`
+|The project artifactId
+|`"starter"`
+
+
+|`buildTool`
+|The tool to use to build the project (maven or gradle)
+|`"maven"`
+
+|`language`
+| The language to use in the project (java or kotlin)
+|`"java"`
+
+|`vertxVersion`
+| The version of vertx to use
+|`"3.5.3"`
+
+|`vertxDependencies`
+|A coma separated list of vertx artifactId
+|`""`
+
+|`archiveFormat`
+|The final archive format (zip, tar, tar.gz, tar.bz)
+|`"zip"`
+|===
+
+Note: The default values are listed in `generator/build.gradle.kts`
+
+== Tasks Sequence
+
+* `generateVertxProject`: the default tasks acts as Gradle entryPoint.
+** DependsOn: `assembleVertxProject`, `projectFiles`, `buildToolFiles` and `configFiles`
+
+* `assembleVertxProject`: Archive the files generated on based on the `archiveFormat` property.
+** DependsOn: `zip`, `tar`
+
+* `projectFiles`: Generates the project source files
+** DependsOn: `mainSources`, `mainResources`, `testSources`, `testResources`
+
+* `buildToolFiles`: Generates the Maven/Gradle Wrapper and project files
+** DependsOn: `maven`, `gradle`
+
+* `configFiles`: Generates the project configuration files (like .gitignore, .editorconfig, etc.)
+** DependsOn: `dotFiles`
+
+
+== How to add a project type
+
+To add a new project type named `my-type`:
+
+* Create a `generator/projects/my-type` folder
+* You can use plain files (they will be copied) or https://freemarker.apache.org/[Freemarker] templates.
+* The project must provide a Java and Kotlin flavor
+* The project must use the default `io.vertx.starter` package root name
+* The project must pass the `test` defined in the `test` project
+* Run `./gradlew travis` pour update the project configuration matrix
+

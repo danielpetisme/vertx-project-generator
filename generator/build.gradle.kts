@@ -11,12 +11,21 @@ ext["default_archiveFormat"] = "zip"
 ext["type"] = project.findProperty("type") ?: ext["default_type"]
 ext["groupId"] = project.findProperty("groupId") ?: ext["default_groupId"]
 ext["artifactId"] = project.findProperty("artifactId") ?: ext["default_artifactId"]
-ext["buildTool"] = project.findProperty("buildTool") ?: ext["default_buildTool"]
-ext["language"] = project.findProperty("language") ?: ext["default_language"]
+
+val buildTool: String = project.findProperty("buildTool") as String? ?: ext["default_buildTool"] as String
+ext["buildTool"] = buildTool.toLowerCase()
+
+val language: String = project.findProperty("language") as String? ?: ext["default_language"] as String
+ext["language"] = language.toLowerCase()
+
 ext["vertxVersion"] = project.findProperty("vertxVersion") ?: ext["default_vertxVersion"]
+
 val dependencies: String? = project.findProperty("vertxDependencies") as String?
 ext["vertxDependencies"] = if (dependencies.isNullOrBlank()) ext["default_vertxDependencies"] else dependencies?.split(",")?.map { it.trim() }
-ext["archiveFormat"] = project.findProperty("archiveFormat") ?: ext["default_archiveFormat"]
+
+val archiveFormat: String = project.findProperty("archiveFormat") as String? ?: ext["default_archiveFormat"] as String
+ext["archiveFormat"] = archiveFormat.toLowerCase()
+
 ext["projectOutputDir"] = buildDir.resolve(ext["artifactId"] as String)
 
 val clean = task("clean") {
@@ -27,13 +36,15 @@ val clean = task("clean") {
 
 val zip = task<Zip>("zip") {
   archiveName = "${ext["artifactId"]}.${ext["archiveFormat"]}"
-  from(ext["projectOutputDir"])
+  from(buildDir)
+  include("${ext["artifactId"]}/**")
   destinationDir = buildDir
 }
 
 val tar = task<Tar>("Tar") {
   archiveName = "${ext["artifactId"]}.${ext["archiveFormat"]}"
-  from(ext["projectOutputDir"])
+  from(buildDir)
+  include("${ext["artifactId"]}/**")
   destinationDir = buildDir
   compression = when (ext["archiveFormat"]) {
     "tar.gz" -> Compression.GZIP
